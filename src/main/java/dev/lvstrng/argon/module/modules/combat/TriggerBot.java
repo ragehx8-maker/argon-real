@@ -175,8 +175,8 @@ public final class TriggerBot extends Module implements TickListener, AttackList
 
     @Override
     public void onAttack(AttackEvent event) {
-        if (event.target != null) {
-            targetEntity = event.target;
+        if (event.getTarget() != null) {
+            targetEntity = event.getTarget();
         }
     }
-}
+    }
