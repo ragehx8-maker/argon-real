@@ -88,8 +88,8 @@ public final class TriggerBot extends Module implements TickListener, AttackList
 
     @Override
     public void onEnable() {
-        currentSwordDelay = swordDelay.getRandomValueInt();
-        currentAxeDelay = axeDelay.getRandomValueInt();
+        currentSwordDelay = (int) swordDelay.getRandomValueFloat();
+        currentAxeDelay = (int) axeDelay.getRandomValueFloat();
         timer.reset();
         eventManager.add(TickListener.class, this);
         eventManager.add(AttackListener.class, this);
@@ -137,7 +137,7 @@ public final class TriggerBot extends Module implements TickListener, AttackList
         if (!allEntities.getValue() && !(entity instanceof PlayerEntity))
             return;
 
-        if (entity instanceof PlayerEntity player && Argon.INSTANCE.getModuleManager().getModule(dev.lvstrng.argon.module.modules.client.Friends.class).isEnabled() && Argon.INSTANCE.getFriendManager().isAimingOverFriend(player))
+        if (entity instanceof PlayerEntity player && Argon.INSTANCE.getModuleManager().getModule(dev.lvstrng.argon.module.modules.client.Friends.class).isEnabled() && Argon.INSTANCE.getFriendManager().isAimingOverFriend())
             return;
 
         if (checkShield.getValue() && entity instanceof PlayerEntity playerEntity && WorldUtils.isShieldFacingAway(playerEntity))
@@ -167,16 +167,16 @@ public final class TriggerBot extends Module implements TickListener, AttackList
                 MouseSimulation.mouseRelease(GLFW.GLFW_MOUSE_BUTTON_LEFT);
             }
 
-            currentSwordDelay = swordDelay.getRandomValueInt();
-            currentAxeDelay = axeDelay.getRandomValueInt();
+            currentSwordDelay = (int) swordDelay.getRandomValueFloat();
+            currentAxeDelay = (int) axeDelay.getRandomValueFloat();
             timer.reset();
         }
     }
 
     @Override
     public void onAttack(AttackEvent event) {
-        if (event.getEntity() != null) {
-            targetEntity = event.getEntity();
+        if (event.entity != null) {
+            targetEntity = event.entity;
         }
     }
 }
