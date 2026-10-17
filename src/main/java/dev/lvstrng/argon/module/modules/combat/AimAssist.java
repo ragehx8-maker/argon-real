@@ -17,7 +17,7 @@ import net.minecraft.util.math.Vec3d;
 import org.lwjgl.glfw.GLFW;
 
 public final class AimAssist extends Module implements HudListener, MouseMoveListener {
-	private final BooleanSetting stickyAim = new BooleanSetting(EncryptedString.of("Sticky Aim"), false)
+	private final BooleanSetting stickyAim = new BooleanSetting(EncryptedString.of("Sticky Aim"), true)
 			.setDescription(EncryptedString.of("Aims at the last attacked player"));
 
 	private final BooleanSetting onlyWeapon = new BooleanSetting(EncryptedString.of("Only Weapon"), true);
@@ -64,6 +64,9 @@ public final class AimAssist extends Module implements HudListener, MouseMoveLis
 	private boolean move;
 	private float pitch, yaw;
 
+	// Doomsday Style Target Lock Variable
+	private PlayerEntity lockedTarget = null;
+
 	@SuppressWarnings("unused")
 	public enum PosMode {
 		Normal, Lerped
@@ -91,6 +94,7 @@ public final class AimAssist extends Module implements HudListener, MouseMoveLis
 		move = true;
 		pitch = pitchSpeed.getRandomValueFloat();
 		yaw = yawSpeed.getRandomValueFloat();
+		lockedTarget = null;
 
 		eventManager.add(HudListener.class, this);
 		eventManager.add(MouseMoveListener.class, this);
@@ -101,6 +105,7 @@ public final class AimAssist extends Module implements HudListener, MouseMoveLis
 
 	@Override
 	public void onDisable() {
+		lockedTarget = null;
 		eventManager.remove(HudListener.class, this);
 		eventManager.remove(MouseMoveListener.class, this);
 		super.onDisable();
@@ -122,9 +127,36 @@ public final class AimAssist extends Module implements HudListener, MouseMoveLis
 		if (onLeftClick.getValue() && GLFW.glfwGetMouseButton(mc.getWindow().getHandle(), GLFW.GLFW_MOUSE_BUTTON_LEFT) != GLFW.GLFW_PRESS)
 			return;
 
-		PlayerEntity target = WorldUtils.findNearestPlayer(mc.player, radius.getValueFloat(), seeOnly.getValue(), true);
-		if (stickyAim.getValue() && mc.player.getAttacking() instanceof PlayerEntity player && player.distanceTo(mc.player) < radius.getValue())
-			target = player;
+		PlayerEntity target = null;
+
+		// --- DOOMSDAY STYLE STRICT TARGET LOCK LOGIC ---
+		if (stickyAim.getValue()) {
+			if (lockedTarget != null) {
+				boolean isDead = !lockedTarget.isAlive() || lockedTarget.getHealth() <= 0;
+				boolean isOutOfRange = mc.player.distanceTo(lockedTarget) > radius.getValueFloat();
+
+				// Jab tak target zinda hai aur radius mein hai, lock nahi hatega
+				if (isDead || isOutOfRange) {
+					lockedTarget = null;
+				}
+			}
+
+			if (lockedTarget == null) {
+				if (mc.player.getAttacking() instanceof PlayerEntity player && player.distanceTo(mc.player) <= radius.getValueFloat()) {
+					lockedTarget = player;
+				} else {
+					lockedTarget = WorldUtils.findNearestPlayer(mc.player, radius.getValueFloat(), seeOnly.getValue(), true);
+				}
+			}
+
+			target = lockedTarget;
+		} else {
+			lockedTarget = null;
+			target = WorldUtils.findNearestPlayer(mc.player, radius.getValueFloat(), seeOnly.getValue(), true);
+			if (mc.player.getAttacking() instanceof PlayerEntity player && player.distanceTo(mc.player) <= radius.getValueFloat()) {
+				target = player;
+			}
+		}
 
 		if (target == null)
 			return;
@@ -206,7 +238,7 @@ public final class AimAssist extends Module implements HudListener, MouseMoveLis
 		return start + MathHelper.wrapDegrees(end - start) * (1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2));
 	}
 
-	public double smoothStepLerp(double delta, double start, double end) {
+	public double smoothStepLerp(double delta, float start, float end) {
 		double value;
 		delta = Math.max(0, Math.min(1, delta));
 
