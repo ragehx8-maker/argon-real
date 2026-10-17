@@ -33,10 +33,10 @@ public final class TriggerBot extends Module implements TickListener, AttackList
     private final BooleanSetting allItems = new BooleanSetting(EncryptedString.of("All Items"), false)
             .setDescription(EncryptedString.of("Works with all Items /THIS USES SWORD DELAY AS THE DELAY/"));
 
-    private final MinMaxSetting swordDelay = new MinMaxSetting(EncryptedString.of("Sword Delay"), 0.0, 1000.0, 250.0, 1.0, 50.0, 50.0)
+    private final MinMaxSetting swordDelay = new MinMaxSetting(EncryptedString.of("Sword Delay"), 0.0, 1000.0, 250.0, 1.0, 50.0)
             .setDescription(EncryptedString.of("Delay for swords"));
 
-    private final MinMaxSetting axeDelay = new MinMaxSetting(EncryptedString.of("Axe Delay"), 0.0, 1000.0, 250.0, 1.0, 50.0, 50.0)
+    private final MinMaxSetting axeDelay = new MinMaxSetting(EncryptedString.of("Axe Delay"), 0.0, 1000.0, 250.0, 1.0, 50.0)
             .setDescription(EncryptedString.of("Delay for axes"));
 
     private final BooleanSetting checkShield = new BooleanSetting(EncryptedString.of("Check Shield"), true)
@@ -104,7 +104,7 @@ public final class TriggerBot extends Module implements TickListener, AttackList
     }
 
     @Override
-    public void onTick(TickEvent event) {
+    public void onTick() {
         if (mc.player == null || mc.world == null)
             return;
 
@@ -175,8 +175,8 @@ public final class TriggerBot extends Module implements TickListener, AttackList
 
     @Override
     public void onAttack(AttackEvent event) {
-        if (event.entity != null) {
-            targetEntity = event.entity;
+        if (event.target != null) {
+            targetEntity = event.target;
         }
     }
 }
