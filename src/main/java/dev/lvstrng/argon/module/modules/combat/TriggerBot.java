@@ -33,10 +33,10 @@ public final class TriggerBot extends Module implements TickListener, AttackList
     private final BooleanSetting allItems = new BooleanSetting(EncryptedString.of("All Items"), false)
             .setDescription(EncryptedString.of("Works with all Items /THIS USES SWORD DELAY AS THE DELAY/"));
 
-    private final MinMaxSetting swordDelay = new MinMaxSetting(EncryptedString.of("Sword Delay"), 0, 1000, 250, 1, 50, 50)
+    private final MinMaxSetting swordDelay = new MinMaxSetting(EncryptedString.of("Sword Delay"), 0.0, 1000.0, 250.0, 1.0, 50.0, 50.0)
             .setDescription(EncryptedString.of("Delay for swords"));
 
-    private final MinMaxSetting axeDelay = new MinMaxSetting(EncryptedString.of("Axe Delay"), 0, 1000, 250, 1, 50, 50)
+    private final MinMaxSetting axeDelay = new MinMaxSetting(EncryptedString.of("Axe Delay"), 0.0, 1000.0, 250.0, 1.0, 50.0, 50.0)
             .setDescription(EncryptedString.of("Delay for axes"));
 
     private final BooleanSetting checkShield = new BooleanSetting(EncryptedString.of("Check Shield"), true)
@@ -66,7 +66,7 @@ public final class TriggerBot extends Module implements TickListener, AttackList
     private final BooleanSetting useShield = new BooleanSetting(EncryptedString.of("Use Shield"), false)
             .setDescription(EncryptedString.of("Uses shield if it's in your offhand"));
 
-    private final NumberSetting shieldTime = new NumberSetting(EncryptedString.of("Shield Time"), 0, 1000, 250, 1);
+    private final NumberSetting shieldTime = new NumberSetting(EncryptedString.of("Shield Time"), 0.0, 1000.0, 250.0, 1.0);
 
     private final BooleanSetting sticky = new BooleanSetting(EncryptedString.of("Same Player"), false)
             .setDescription(EncryptedString.of("Hits the player that was recently attacked, good for FFA"));
@@ -137,7 +137,7 @@ public final class TriggerBot extends Module implements TickListener, AttackList
         if (!allEntities.getValue() && !(entity instanceof PlayerEntity))
             return;
 
-        if (entity instanceof PlayerEntity player && Argon.INSTANCE.getModuleManager().getModule(dev.lvstrng.argon.module.modules.client.Friends.class).isEnabled() && Argon.INSTANCE.getModuleManager().getModule(dev.lvstrng.argon.module.modules.client.Friends.class).getFriendManager().isAimingOverFriend(player))
+        if (entity instanceof PlayerEntity player && Argon.INSTANCE.getModuleManager().getModule(dev.lvstrng.argon.module.modules.client.Friends.class).isEnabled() && Argon.INSTANCE.getFriendManager().isAimingOverFriend(player))
             return;
 
         if (checkShield.getValue() && entity instanceof PlayerEntity playerEntity && WorldUtils.isShieldFacingAway(playerEntity))
@@ -146,7 +146,6 @@ public final class TriggerBot extends Module implements TickListener, AttackList
         if (sticky.getValue() && targetEntity != null && targetEntity != entity)
             return;
 
-        // Delay & Attack Execution Logic
         int delay = isSword ? currentSwordDelay : currentAxeDelay;
         if (timer.delay(delay)) {
             if (clickSimulation.getValue()) {
@@ -176,8 +175,8 @@ public final class TriggerBot extends Module implements TickListener, AttackList
 
     @Override
     public void onAttack(AttackEvent event) {
-        if (event.entity != null) {
-            targetEntity = event.entity;
+        if (event.getEntity() != null) {
+            targetEntity = event.getEntity();
         }
     }
 }
